@@ -1,4 +1,4 @@
-import type { CustomPayload, HMRPayload } from 'types/hmrPayload'
+import type { CustomPayload, HotPayload } from 'types/hotPayload'
 import type { ModuleRunnerHMRConnection } from 'vite/module-runner'
 import type { HMRBroadcasterClient, ServerHMRChannel } from '../../server/hmr'
 
@@ -6,7 +6,7 @@ class ServerHMRBroadcasterClient implements HMRBroadcasterClient {
   constructor(private readonly hmrChannel: ServerHMRChannel) {}
 
   send(...args: any[]) {
-    let payload: HMRPayload
+    let payload: HotPayload
     if (typeof args[0] === 'string') {
       payload = {
         type: 'custom',
@@ -30,14 +30,14 @@ class ServerHMRBroadcasterClient implements HMRBroadcasterClient {
  * @experimental
  */
 export class ServerHMRConnector implements ModuleRunnerHMRConnection {
-  private handlers: ((payload: HMRPayload) => void)[] = []
+  private handlers: ((payload: HotPayload) => void)[] = []
   private hmrClient: ServerHMRBroadcasterClient
 
   private connected = false
 
   constructor(private hmrChannel: ServerHMRChannel) {
     this.hmrClient = new ServerHMRBroadcasterClient(hmrChannel)
-    hmrChannel.api.outsideEmitter.on('send', (payload: HMRPayload) => {
+    hmrChannel.api.outsideEmitter.on('send', (payload: HotPayload) => {
       this.handlers.forEach((listener) => listener(payload))
     })
     this.hmrChannel = hmrChannel
@@ -56,7 +56,7 @@ export class ServerHMRConnector implements ModuleRunnerHMRConnection {
     )
   }
 
-  onUpdate(handler: (payload: HMRPayload) => void): void {
+  onUpdate(handler: (payload: HotPayload) => void): void {
     this.handlers.push(handler)
     handler({ type: 'connected' })
     this.connected = true

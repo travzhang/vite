@@ -19,7 +19,7 @@ import {
 import { resolveEnvironmentPlugins } from '../plugin'
 import type { DepsOptimizer } from '../optimizer'
 import { EnvironmentModuleGraph } from './moduleGraph'
-import type { HMRChannel } from './hmr'
+import type { HotChannel } from './hmr'
 import { createNoopHMRChannel, getShortName, updateModules } from './hmr'
 import { transformRequest } from './transformRequest'
 import type { TransformResult } from './transformRequest'
@@ -31,7 +31,7 @@ import type { RemoteEnvironmentTransport } from './environmentTransport'
 import type { EnvironmentPluginContainer } from './pluginContainer'
 
 export interface DevEnvironmentSetup {
-  hot?: false | HMRChannel
+  hot: false | HotChannel
   watcher?: FSWatcher
   options?: EnvironmentOptions
   runner?: FetchModuleOptions & {
@@ -96,18 +96,18 @@ export class DevEnvironment extends Environment {
    * @example
    * environment.hot.send({ type: 'full-reload' })
    */
-  hot: HMRChannel
+  hot: HotChannel
   constructor(
     name: string,
     config: ResolvedConfig,
-    setup?: DevEnvironmentSetup,
+    setup: DevEnvironmentSetup,
   ) {
     let options =
       config.environments[name] ?? getDefaultResolvedEnvironmentOptions(config)
-    if (setup?.options) {
+    if (setup.options) {
       options = mergeConfig(
         options,
-        setup?.options,
+        setup.options,
       ) as ResolvedEnvironmentOptions
     }
     super(name, config, options)
@@ -118,17 +118,17 @@ export class DevEnvironment extends Environment {
       this.pluginContainer!.resolveId(url, undefined),
     )
 
-    this.hot = setup?.hot || createNoopHMRChannel()
-    this.watcher = setup?.watcher
+    this.hot = setup.hot || createNoopHMRChannel()
+    this.watcher = setup.watcher
 
     this._onCrawlEndCallbacks = []
     this._crawlEndFinder = setupOnCrawlEnd(() => {
       this._onCrawlEndCallbacks.forEach((cb) => cb())
     })
 
-    const ssrRunnerOptions = setup?.runner || {}
+    const ssrRunnerOptions = setup.runner || {}
     this._ssrRunnerOptions = ssrRunnerOptions
-    setup?.runner?.transport?.register(this)
+    setup.runner?.transport?.register(this)
 
     this.hot.on('vite:invalidate', async ({ path, message }) => {
       invalidateModule(this, {
@@ -138,8 +138,8 @@ export class DevEnvironment extends Environment {
     })
 
     const { optimizeDeps } = this.options.dev
-    if (setup?.depsOptimizer) {
-      this.depsOptimizer = setup?.depsOptimizer
+    if (setup.depsOptimizer) {
+      this.depsOptimizer = setup.depsOptimizer
     } else if (
       optimizeDeps?.noDiscovery &&
       optimizeDeps?.include?.length === 0

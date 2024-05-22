@@ -1,18 +1,18 @@
-import type { HMRPayload } from 'types/hmrPayload'
+import type { HotPayload } from 'types/hotPayload'
 import { slash, unwrapId } from '../shared/utils'
 import type { ModuleRunner } from './runner'
 
 // updates to HMR should go one after another. It is possible to trigger another update during the invalidation for example.
 export function createHMRHandler(
   runner: ModuleRunner,
-): (payload: HMRPayload) => Promise<void> {
+): (payload: HotPayload) => Promise<void> {
   const queue = new Queue()
   return (payload) => queue.enqueue(() => handleHMRPayload(runner, payload))
 }
 
 export async function handleHMRPayload(
   runner: ModuleRunner,
-  payload: HMRPayload,
+  payload: HotPayload,
 ): Promise<void> {
   const hmrClient = runner.hmrClient
   if (!hmrClient || runner.isDestroyed()) return
