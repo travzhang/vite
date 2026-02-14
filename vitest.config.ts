@@ -20,6 +20,7 @@ export default defineConfig({
     testTimeout: 20000,
     isolate: false,
         coverage: {
+          enabled: true,
       provider: 'v8',
       reporter: ['json'],
       outputDir: 'coverage',
