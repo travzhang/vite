@@ -19,6 +19,11 @@ export default defineConfig({
     },
     testTimeout: 20000,
     isolate: false,
+        coverage: {
+      provider: 'v8',
+      reporter: ['json'],
+      outputDir: 'coverage',
+    },
   },
   oxc: {
     target: 'node20',
